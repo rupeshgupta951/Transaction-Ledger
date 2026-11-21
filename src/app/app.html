@@ -1,0 +1,27 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/ledger">
+      <span class="brand-mark">N</span>
+      <span>Northstar<span class="brand-sub">FINANCE WORKSPACE</span></span>
+    </a>
+    <div class="nav-caption">WORKSPACE</div>
+    <nav>
+      <a routerLink="/ledger" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <span class="nav-icon">▤</span> Transaction ledger
+      </a>
+      <a routerLink="/rules" routerLinkActive="active"><span class="nav-icon">◇</span> Policy rules</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="avatar">RP</div>
+      <div><strong>Rupesh Patel</strong><small>Finance analyst</small></div>
+      <span class="online-dot"></span>
+    </div>
+  </aside>
+
+  <main class="main-area">
+    @if (store.storageError()) {
+      <div class="storage-warning" role="status">{{ store.storageError() }}</div>
+    }
+    <router-outlet />
+  </main>
+</div>

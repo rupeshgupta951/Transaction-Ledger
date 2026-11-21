@@ -1,0 +1,101 @@
+<section class="page ledger-page">
+  <div class="page-heading">
+    <div>
+      <div class="eyebrow">FINANCE WORKSPACE <span>/</span> TRANSACTIONS</div>
+      <h1>Transaction ledger</h1>
+      <p class="subtitle">Review, filter and audit your organization's spending.</p>
+    </div>
+    <div class="heading-actions">
+      <label class="button button-outline import-button" [attr.aria-busy]="importing()">
+        @if (importing()) { <span class="loader" aria-hidden="true"></span> Importing... }
+        @else { <span>↑</span> Import CSV }
+        <input type="file" accept=".csv,text/csv" [disabled]="importing()" (change)="importFile($event)" />
+      </label>
+      <a class="button button-outline sample-button" href="/sample-transactions.csv" download="sample-transactions.csv">↓ Sample CSV</a>
+      <div class="reset-action">
+        <button class="button button-primary" type="button" title="Restore the original 40 transactions. Your policy rules are not changed." (click)="resetDemoData()">Reset demo data</button>
+        <small>Restores 40 transactions; keeps your rules.</small>
+      </div>
+    </div>
+  </div>
+
+  @if (importMessage()) {
+    <div class="import-message" role="status">{{ importMessage() }}</div>
+  }
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-label">TOTAL TRANSACTIONS</span><strong>{{ store.transactions().length }}</strong>
+      <span class="summary-note">Across all categories</span><span class="summary-icon neutral">▤</span>
+    </article>
+    <article class="summary-card">
+      <span class="summary-label">APPROVED</span><strong>{{ approvedCount() }}</strong>
+      <span class="summary-note"><i class="tiny-dot approved-dot"></i> Ready for reconciliation</span><span class="summary-icon green">✓</span>
+    </article>
+    <article class="summary-card">
+      <span class="summary-label">FLAGGED</span><strong>{{ flaggedCount() }}</strong>
+      <span class="summary-note"><i class="tiny-dot flagged-dot"></i> Require your attention</span><span class="summary-icon amber">!</span>
+    </article>
+    <article class="summary-card">
+      <span class="summary-label">PENDING</span><strong>{{ pendingCount() }}</strong>
+      <span class="summary-note"><i class="tiny-dot pending-dot"></i> Awaiting approval</span><span class="summary-icon blue">◷</span>
+    </article>
+  </div>
+
+  <section class="ledger-card">
+    <div class="ledger-card-heading">
+      <div><h2>All transactions <span class="count-pill">{{ filteredTransactions().length }}</span></h2><p>Search and filter your transaction activity</p></div>
+      <a class="rules-link" routerLink="/rules">◇ Manage rules <span>→</span></a>
+    </div>
+    <div class="filters">
+      <label class="search-control"><span>⌕</span><input type="search" placeholder="Search merchants..." [value]="filters().q" (input)="onSearch($event)" /></label>
+      <select aria-label="Filter by category" [value]="filters().category" (change)="setCategory($event)">
+        <option value="">All categories</option>
+        @for (category of store.categories(); track category) { <option [value]="category">{{ category }}</option> }
+      </select>
+      <select aria-label="Filter by status" [value]="filters().status" (change)="setStatus($event)">
+        <option value="">All statuses</option><option>Approved</option><option>Flagged</option><option>Pending</option>
+      </select>
+      <label class="amount-filter"><span>$</span><input type="number" min="0" placeholder="Min amount" [value]="filters().min" (input)="setAmount('min', $event)" /></label>
+      <label class="amount-filter"><span>$</span><input type="number" min="0" placeholder="Max amount" [value]="filters().max" (input)="setAmount('max', $event)" /></label>
+      @if (hasActiveFilters()) {
+        <button class="reset-filters" type="button" (click)="resetFilters()">Reset filters</button>
+      }
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>TRANSACTION</th><th>CATEGORY</th><th>DATE</th><th>AMOUNT</th><th>STATUS</th><th>RULE CHECKS</th><th></th></tr></thead>
+        <tbody>
+          @for (transaction of filteredTransactions(); track transaction.id) {
+            <tr [routerLink]="['tx', transaction.id]" queryParamsHandling="preserve">
+              <td><div class="merchant-cell"><span class="merchant-icon">{{ transaction.merchant.slice(0, 1) }}</span><div><strong>{{ transaction.merchant }}</strong><small>TXN-{{ transaction.id.slice(-3) }}</small></div></div></td>
+              <td><span class="category-label">{{ transaction.category }}</span></td>
+              <td>{{ transaction.date | date:'MMM d, y' }}</td>
+              <td class="amount-cell">{{ transaction.amount | currency:'USD':'symbol':'1.2-2' }}</td>
+              <td>
+                @switch (transaction.status) {
+                  @case ('Approved') { <span class="status-pill approved">Approved</span> }
+                  @case ('Flagged') { <span class="status-pill flagged">Flagged</span> }
+                  @default { <span class="status-pill pending">Pending</span> }
+                }
+              </td>
+              <td>
+                @for (rule of store.rules(); track rule.id) {
+                  @if (rule.enabled && violatesRule(transaction, rule)) {
+                    <span class="rule-badge" [class.blocker]="rule.severity === 'Blocker'">{{ rule.name }}</span>
+                  }
+                }
+                @if (!store.rules().some((rule) => rule.enabled && violatesRule(transaction, rule))) { <span class="no-rule">—</span> }
+              </td>
+              <td class="row-arrow">›</td>
+            </tr>
+          } @empty {
+            <tr><td class="empty-state" colspan="7"><strong>No transactions found</strong><span>Try adjusting your filters or import a CSV.</span></td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">Showing <strong>{{ filteredTransactions().length }}</strong> of <strong>{{ store.transactions().length }}</strong> transactions <span>Updated just now</span></div>
+  </section>
+</section>
+<router-outlet />

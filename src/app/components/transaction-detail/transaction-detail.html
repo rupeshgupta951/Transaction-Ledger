@@ -1,0 +1,40 @@
+<div class="drawer-backdrop" (click)="close()">
+  <aside class="detail-drawer" (click)="$event.stopPropagation()">
+    <header class="drawer-header">
+      <div><div class="drawer-eyebrow">TRANSACTION DETAILS</div><h2>Review transaction</h2></div>
+      <button class="icon-button" type="button" aria-label="Close details" (click)="close()">×</button>
+    </header>
+    @if (transaction(); as item) {
+      <div class="drawer-content">
+        <div class="detail-merchant"><span class="large-merchant-icon">{{ item.merchant.slice(0, 1) }}</span><div><strong>{{ item.merchant }}</strong><small>TXN-{{ item.id.slice(-3) }} · {{ item.date | date:'MMM d, y' }}</small></div></div>
+        <div class="amount-panel"><span>TRANSACTION AMOUNT</span><strong>{{ item.amount | currency:'USD':'symbol':'1.2-2' }}</strong></div>
+        <div class="detail-grid">
+          <div><span>CATEGORY</span><strong>{{ item.category }}</strong></div>
+          <div><span>REFERENCE</span><strong>{{ item.id }}</strong></div>
+        </div>
+        <label class="field-label" for="transaction-status">Status</label>
+        <select id="transaction-status" [value]="item.status" (change)="updateStatus($event)">
+          <option>Approved</option><option>Flagged</option><option>Pending</option>
+        </select>
+        <label class="field-label" for="transaction-notes">Audit notes</label>
+        <textarea id="transaction-notes" rows="5" placeholder="Add context for your team..." [value]="item.notes" (input)="updateNotes($event)"></textarea>
+        <div class="drawer-rule-heading">ACTIVE POLICY CHECKS</div>
+        @for (rule of activeRules(); track rule.id) {
+          <div class="drawer-rule"><span>{{ rule.name }}</span><span class="rule-outcome" [class.violated]="ruleViolates(rule.id)">{{ ruleViolates(rule.id) ? 'Violated' : 'Passed' }}</span></div>
+        } @empty {
+          <p class="no-active-rules">No active rules configured.</p>
+        }
+      </div>
+      <footer class="drawer-footer">
+        <button class="button button-outline" type="button" (click)="close()">Close</button>
+        <button class="button button-primary" type="button" (click)="save()">Save changes</button>
+      </footer>
+    } @else {
+      <div class="missing-transaction">This transaction could not be found.</div>
+      <footer class="drawer-footer"><button class="button button-primary" type="button" (click)="close()">Back to ledger</button></footer>
+    }
+  </aside>
+</div>
+@if (savedMessage()) {
+  <div class="undo-toast" role="status"><span>{{ savedMessage() }}</span>@if (savedSnapshot) { <button type="button" (click)="undo()">Undo</button> }</div>
+}

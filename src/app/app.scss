@@ -1,0 +1,29 @@
+:host { display: block; min-height: 100vh; }
+.app-shell { height: 100vh; display: flex; overflow: hidden; }
+.sidebar { position: sticky; top: 0; width: 246px; height: 100vh; flex: 0 0 246px; display: flex; flex-direction: column; padding: 24px 16px 18px; color: #b7c4c6; background: #102629; }
+.brand { display: flex; align-items: center; gap: 11px; margin: 0 5px 48px; color: white; font-size: 15px; font-weight: 750; letter-spacing: -.3px; }
+.brand-mark { width: 33px; height: 33px; display: grid; place-items: center; border-radius: 10px; background: #a4d66d; color: #183330; font-size: 18px; }
+.brand-sub { display: block; margin-top: 3px; color: #8ea3a4; font-size: 8px; letter-spacing: 1.1px; }
+.nav-caption { padding: 0 12px; margin-bottom: 12px; color: #718789; font-size: 10px; font-weight: 700; letter-spacing: 1.2px; }
+.sidebar nav { display: grid; gap: 5px; }
+.sidebar nav a { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 8px; color: #afc0c0; font-size: 13px; transition: .15s ease; }
+.sidebar nav a:hover, .sidebar nav a.active { color: #fff; background: #213b3d; }
+.sidebar nav a.active { box-shadow: inset 3px 0 #a4d66d; }
+.nav-icon { width: 16px; text-align: center; color: #a4d66d; font-size: 17px; }
+.sidebar-bottom { display: flex; align-items: center; gap: 10px; margin-top: auto; padding: 15px 3px 0; border-top: 1px solid #294143; font-size: 11px; }
+.sidebar-bottom strong, .sidebar-bottom small { display: block; }
+.sidebar-bottom strong { color: #edf3ee; font-weight: 600; }
+.sidebar-bottom small { margin-top: 4px; color: #8ea3a4; }
+.avatar { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: #d6e8c8; color: #23413b; font-size: 10px; font-weight: 700; }
+.online-dot { width: 7px; height: 7px; margin-left: auto; border-radius: 50%; background: #83c779; }
+.main-area { min-width: 0; height: 100vh; flex: 1; overflow-y: auto; overscroll-behavior: contain; background: #f6f8f6; }
+.storage-warning { padding: 10px 24px; background: #fff5d8; color: #795b15; font-size: 12px; text-align: center; }
+@media (max-width: 700px) {
+  .app-shell { height: auto; min-height: 100vh; display: block; overflow: visible; }
+  .sidebar { position: sticky; z-index: 10; top: 0; width: auto; height: auto; padding: 12px 14px; }
+  .main-area { height: auto; min-height: calc(100vh - 94px); overflow: visible; }
+  .brand { margin: 0 0 12px; }
+  .nav-caption, .sidebar-bottom { display: none; }
+  .sidebar nav { display: flex; }
+  .sidebar nav a { flex: 1; justify-content: center; padding: 9px 5px; font-size: 12px; }
+}

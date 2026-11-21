@@ -1,0 +1,5 @@
+merchant,category,amount,date,status,notes
+Paper Trail Office,Office Supplies,186.45,2026-11-03,Pending,Quarterly stationery order
+Cloud Harbor,Software,1299.00,2026-11-05,Approved,Annual team subscription
+Metro Rail,Travel,42.50,2026-11-07,Flagged,"Weekend trip, confirm business purpose"
+Juniper Cafe,Meals,78.20,2026-11-10,Approved,Client meeting refreshments

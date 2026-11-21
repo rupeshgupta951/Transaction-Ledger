@@ -1,0 +1,71 @@
+<section class="page rules-page">
+  <div class="page-heading">
+    <div><div class="eyebrow">FINANCE WORKSPACE <span>/</span> POLICY CONFIGURATION</div><h1>Policy rules</h1><p class="subtitle">Create deterministic checks to keep every transaction compliant.</p></div>
+  </div>
+  <div class="rules-layout">
+    <section class="rule-list-card">
+      <header class="card-heading"><div><h2>Your rules</h2><p>{{ store.rules().length }} configured policies</p></div><span class="rules-count">{{ store.rules().length }}</span></header>
+      <div class="rule-list">
+        @for (rule of store.rules(); track rule.id) {
+          <article class="rule-item" [class.rule-disabled]="!rule.enabled">
+            <div class="rule-item-top">
+              <span class="severity-icon" [class.blocker-icon]="rule.severity === 'Blocker'">{{ rule.severity === 'Blocker' ? '!' : '◇' }}</span>
+              <div class="rule-title"><strong>{{ rule.name }}</strong><small>{{ rule.severity }} · Match {{ rule.logic === 'all' ? 'all' : 'any' }}</small></div>
+              <button class="toggle" type="button" [class.on]="rule.enabled" [attr.aria-label]="rule.enabled ? 'Disable rule' : 'Enable rule'" (click)="store.toggleRule(rule.id)"><span></span></button>
+            </div>
+            <div class="condition-summary">
+              @for (condition of rule.conditions; track $index; let last = $last) {
+                <span>{{ condition.field }} {{ condition.operator }} {{ condition.value }}</span>@if (!last) { <b>{{ rule.logic === 'all' ? 'AND' : 'OR' }}</b> }
+              }
+            </div>
+            <div class="rule-actions"><button type="button" (click)="edit(rule)">Edit rule</button><button type="button" class="delete-action" (click)="store.deleteRule(rule.id)">Delete</button></div>
+          </article>
+        } @empty {
+          <div class="empty-rules"><span>◇</span><strong>No rules yet</strong><small>Create a rule to automatically check your transactions.</small></div>
+        }
+      </div>
+    </section>
+
+    <section class="rule-form-card">
+      <header class="card-heading"><div><h2>{{ editingId ? 'Edit rule' : 'Create a rule' }}</h2><p>Set the rule details and conditions below</p></div></header>
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <label class="form-label" for="rule-name">Rule name <span>*</span></label>
+        <input id="rule-name" class="form-input" formControlName="name" placeholder="e.g. Flag high-value purchases" />
+        @if (form.controls.name.touched && form.controls.name.invalid) { <small class="form-error">Enter a name for this rule.</small> }
+
+        <div class="form-row">
+          <div><label class="form-label" for="rule-severity">Severity</label><select id="rule-severity" class="form-input" formControlName="severity"><option>Warning</option><option>Blocker</option></select></div>
+          <div><label class="form-label" for="rule-logic">Match conditions</label><select id="rule-logic" class="form-input" formControlName="logic"><option value="all">Match ALL (AND)</option><option value="any">Match ANY (OR)</option></select></div>
+        </div>
+
+        <div class="conditions-title"><div><strong>Conditions</strong><span> {{ conditions.length }}</span></div><small>Define when this rule should trigger</small></div>
+        <div formArrayName="conditions" class="condition-list">
+          @for (condition of conditions.controls; track $index; let i = $index) {
+            <div class="condition-row" [formGroupName]="i">
+              <label class="sr-only" [for]="'field-' + i">Field</label>
+              <select [id]="'field-' + i" formControlName="field">
+                @for (field of fields; track field) { <option [value]="field">{{ field }}</option> }
+              </select>
+              <label class="sr-only" [for]="'operator-' + i">Operator</label>
+              <select [id]="'operator-' + i" formControlName="operator">
+                @for (operator of operators; track operator) { <option [value]="operator">{{ operator }}</option> }
+              </select>
+              <label class="sr-only" [for]="'value-' + i">Value</label>
+              <input [id]="'value-' + i" formControlName="value" [placeholder]="condition.controls.field.value === 'Weekend Transaction' ? 'true or false' : 'Enter a value'" />
+              <button class="remove-condition" type="button" aria-label="Remove condition" [disabled]="conditions.length === 1" (click)="removeCondition(i)">×</button>
+              @if (condition.touched && condition.hasError('amountMustBeNumber')) { <small class="form-error condition-error">Amount must be a number.</small> }
+              @if (condition.touched && condition.hasError('invalidWeekendCondition')) { <small class="form-error condition-error">Weekend conditions use equals and true or false.</small> }
+              @if (condition.touched && condition.hasError('invalidConditionOperator')) { <small class="form-error condition-error">Choose an operator supported by this field.</small> }
+            </div>
+          }
+        </div>
+        <button class="add-condition" type="button" (click)="addCondition()">＋ Add condition</button>
+
+        <div class="form-actions">
+          @if (editingId) { <button class="button button-outline" type="button" (click)="cancelEdit()">Cancel</button> }
+          <button class="button button-primary" type="submit" [disabled]="form.invalid">{{ editingId ? 'Save changes' : 'Create rule' }}</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</section>
